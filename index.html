@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVL Tree Visualizer</title>
+  <meta name="description" content="Interactive AVL Tree Visualizer – insert numbers and watch the tree self-balance with LL, RR, LR, and RL rotations illustrated in real time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background blobs -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="7" r="5" fill="url(#g1)"/>
+          <circle cx="7"  cy="24" r="5" fill="url(#g2)"/>
+          <circle cx="25" cy="24" r="5" fill="url(#g3)"/>
+          <line x1="16" y1="12" x2="7"  y2="19" stroke="#a78bfa" stroke-width="2"/>
+          <line x1="16" y1="12" x2="25" y2="19" stroke="#818cf8" stroke-width="2"/>
+          <defs>
+            <linearGradient id="g1" x1="11" y1="2" x2="21" y2="12" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#c4b5fd"/><stop offset="1" stop-color="#818cf8"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="2" y1="19" x2="12" y2="29" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a78bfa"/><stop offset="1" stop-color="#6366f1"/>
+            </linearGradient>
+            <linearGradient id="g3" x1="20" y1="19" x2="30" y2="29" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#818cf8"/><stop offset="1" stop-color="#4f46e5"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <h1 class="header-title">AVL Tree Visualizer</h1>
+        <p class="header-sub">Self-balancing binary search tree — live, interactive</p>
+      </div>
+    </header>
+
+    <!-- Controls -->
+    <section class="controls-card" aria-label="Tree controls">
+      <div class="controls-row">
+        <div class="input-group">
+          <label for="node-input" class="sr-only">Enter a number</label>
+          <input
+            id="node-input"
+            type="number"
+            placeholder="Enter a number…"
+            min="-9999"
+            max="9999"
+            autocomplete="off"
+          />
+        </div>
+        <button id="insert-btn" class="btn btn-primary" aria-label="Insert node">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          Insert
+        </button>
+        <button id="reset-btn" class="btn btn-ghost" aria-label="Reset tree">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 8a6 6 0 1 0 1.5-4M2 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Reset
+        </button>
+      </div>
+
+      <!-- Quick-insert chips -->
+      <div class="chip-row">
+        <span class="chip-label">Try:</span>
+        <button class="chip" data-seq="10,20,30">LL demo</button>
+        <button class="chip" data-seq="30,20,10">RR demo</button>
+        <button class="chip" data-seq="10,30,20">LR demo</button>
+        <button class="chip" data-seq="30,10,20">RL demo</button>
+        <button class="chip" data-seq="50,30,70,20,40,60,80,10,25">Balanced tree</button>
+      </div>
+    </section>
+
+    <!-- Rotation status -->
+    <div id="rotation-banner" class="rotation-banner hidden" role="status" aria-live="polite">
+      <span id="rotation-icon" class="rotation-icon"></span>
+      <span id="rotation-text"></span>
+    </div>
+
+    <!-- Tree canvas area -->
+    <section class="tree-section" aria-label="Tree visualization">
+      <div class="tree-meta">
+        <span class="meta-pill" id="meta-nodes">Nodes: 0</span>
+        <span class="meta-pill" id="meta-height">Height: 0</span>
+        <span class="meta-pill" id="meta-bf">Root BF: 0</span>
+      </div>
+
+      <div class="tree-container" id="tree-container" role="img" aria-label="AVL tree diagram">
+        <!-- SVG for edges rendered behind nodes -->
+        <svg id="edge-svg" class="edge-svg" aria-hidden="true"></svg>
+        <!-- Nodes rendered as divs on top -->
+        <div id="node-layer" class="node-layer"></div>
+
+        <div class="empty-state" id="empty-state">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" opacity="0.35">
+            <circle cx="32" cy="14" r="10" stroke="#a78bfa" stroke-width="2"/>
+            <circle cx="14" cy="48" r="10" stroke="#818cf8" stroke-width="2"/>
+            <circle cx="50" cy="48" r="10" stroke="#6366f1" stroke-width="2"/>
+            <line x1="32" y1="24" x2="14" y2="38" stroke="#a78bfa" stroke-width="2"/>
+            <line x1="32" y1="24" x2="50" y2="38" stroke="#818cf8" stroke-width="2"/>
+          </svg>
+          <p>Insert a number to begin</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rotation log -->
+    <section class="log-section" aria-label="Rotation log">
+      <div class="log-header">
+        <h2 class="log-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M5 5h6M5 8h4M5 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Rotation Log
+        </h2>
+        <button id="clear-log-btn" class="btn-clear">Clear</button>
+      </div>
+      <div id="rotation-log" class="rotation-log" aria-live="polite">
+        <p class="log-empty">No rotations yet.</p>
+      </div>
+    </section>
+
+    <!-- Legend -->
+    <section class="legend" aria-label="Legend">
+      <div class="legend-item"><span class="legend-dot dot-ll"></span>LL Rotation</div>
+      <div class="legend-item"><span class="legend-dot dot-rr"></span>RR Rotation</div>
+      <div class="legend-item"><span class="legend-dot dot-lr"></span>LR Rotation</div>
+      <div class="legend-item"><span class="legend-dot dot-rl"></span>RL Rotation</div>
+      <div class="legend-item"><span class="legend-dot dot-none"></span>No Rotation</div>
+    </section>
+  </div>
+
+  <script src="avl.js"></script>
+</body>
+</html>
