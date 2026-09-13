@@ -1,214 +1,63 @@
 # AVL Tree Visualizer
 
-A fully interactive, browser-based visualization of an **AVL (Adelson-Velsky and Landis) Self-Balancing Binary Search Tree**, built with pure **HTML, CSS, and Vanilla JavaScript** — no frameworks required.
+An interactive, browser-based visualization of an AVL (Adelson-Velsky and Landis) self-balancing binary search tree, built with pure HTML, CSS, and vanilla JavaScript — no frameworks.
+
+**Try it here:** https://avltreevisdeploy.vercel.app/
+
+## Preview
+
+![Empty state](assets/empty-state.png)
+
+## Features
+
+- **Live Rebalancing**: Insert numbers one at a time and watch the tree rebalance itself automatically.
+- **Rotation Tracking**: Color-coded highlights plus a live log identifying each rotation as LL, RR, LR, or RL.
+- **Balance Factor Badges**: Every node displays its balance factor, updated in real time.
+- **Stats Bar**: Running counts for total nodes, tree height, and root balance factor.
+- **Demo Sequences**: One-click preloaded insertions that reliably trigger each rotation case.
+- **SVG Edges**: Parent-child connections redraw dynamically as the tree restructures.
 
 ---
 
-## 📖 Project Overview
+## In Action
 
-This project lets you insert numbers one at a time and watch the AVL tree rebalance itself in real time. Each node is rendered as an animated circle, edges are drawn with SVG, and a banner + scrollable log tells you exactly which rotation occurred (LL, RR, LR, or RL) and why.
-
-**Key features:**
-
-- Live animated tree with smooth CSS transitions
-- Color-coded rotation highlighting
-- Balance factor badge on every node
-- Timestamped rotation log
-- One-click demo sequences (LL, RR, LR, RL, Balanced)
-- Fully responsive layout
+| After a Rotation                           | Rotation Log                             |
+| ------------------------------------------ | ---------------------------------------- |
+| ![RR rotation applied](assets/preview.png) | ![Rotation log](assets/rotation-log.png) |
 
 ---
 
-## ⏱ Time Complexity of BST Operations
+## Installation
 
-| Operation | Average Case | Worst Case (Unbalanced) |
-| --------- | ------------ | ----------------------- |
-| Search    | O(log n)     | O(n)                    |
-| Insert    | O(log n)     | O(n)                    |
-| Delete    | O(log n)     | O(n)                    |
-| Traversal | O(n)         | O(n)                    |
-
-A standard (unbalanced) BST can degrade into a **linked list** when elements are inserted in sorted order, causing operations to become **O(n)** instead of **O(log n)**.
+1. Clone or download this repository.
+2. Open `index.html` directly in any modern browser (Chrome, Firefox, Edge, Safari).
+3. If your browser restricts local files, serve the folder instead: `python -m http.server 8000`, then visit `http://localhost:8000`.
 
 ---
 
-## ⚖️ Why a Balanced BST is Needed
+## Tech Stack
 
-If values are inserted in sorted order into a normal BST:
-
-```
-Insert: 10 → 20 → 30 → 40 → 50
-
-BST structure:
-10
-  \
-  20
-    \
-    30
-      \
-      40
-        \
-        50
-```
-
-The height of the tree becomes **n**, and operations degrade to **O(n)**.
-
-Balanced trees fix this problem by automatically restructuring themselves to keep height **O(log n)**.
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Rendering**: SVG for dynamic edge connections
+- **Reference implementation**: `avltree.java` — a standalone console AVL insert/rotation implementation with an ASCII tree printer, kept separate from the browser visualizer
 
 ---
 
-## 🌲 Introduction to AVL Trees
+## How It Works
 
-An **AVL Tree** is a self-balancing Binary Search Tree where the **difference in height between the left and right subtree of any node is at most 1**.
+An AVL tree keeps the height difference between a node's left and right subtrees (its balance factor) at -1, 0, or 1. When an insertion pushes that value to +2 or -2, the tree performs one of four rotations to restore balance:
 
-Properties:
+| Case | Trigger                                       | Fix                                |
+| ---- | --------------------------------------------- | ---------------------------------- |
+| LL   | Insertion into left subtree of a left child   | Single right rotation              |
+| RR   | Insertion into right subtree of a right child | Single left rotation               |
+| LR   | Insertion into right subtree of a left child  | Left rotation, then right rotation |
+| RL   | Insertion into left subtree of a right child  | Right rotation, then left rotation |
 
-- Maintains standard BST ordering
-- Automatically balances after insertion
-- Tree height remains **O(log n)**
-- Guarantees **O(log n)** search, insert, and delete operations
-
----
-
-## 📐 Detecting Imbalance: Balance Factor
-
-The **Balance Factor (BF)** of a node is defined as:
-
-```
-BF(node) = height(left subtree) − height(right subtree)
-```
-
-| Balance Factor | Meaning     |
-| -------------- | ----------- |
-| -1, 0, 1       | Balanced    |
-| +2             | Left heavy  |
-| -2             | Right heavy |
-
-When the absolute value of BF becomes greater than **1**, the tree must perform **rotations** to restore balance.
+This keeps search, insert, and delete at O(log n), even in the worst case — unlike an unbalanced BST, which can degrade to O(n) on sorted input.
 
 ---
 
-## 🔄 The Four Rotation Cases
+## Author
 
-### LL Rotation (Left-Left)
-
-**Condition:**  
-The new node is inserted into the **left subtree of the left child**.
-
-**Fix:**  
-Perform a **Right Rotation**.
-
-```
-    z
-   /
-  y
- /
-x
-```
-
-After rotation:
-
-```
-    y
-   / \
-  x   z
-```
-
----
-
-### RR Rotation (Right-Right)
-
-**Condition:**  
-The new node is inserted into the **right subtree of the right child**.
-
-**Fix:**  
-Perform a **Left Rotation**.
-
-```
-z
- \
-  y
-   \
-    x
-```
-
-After rotation:
-
-```
-    y
-   / \
-  z   x
-```
-
----
-
-### LR Rotation (Left-Right)
-
-**Condition:**  
-The new node is inserted into the **right subtree of the left child**.
-
-**Fix:**
-
-1. Left rotation on the left child
-2. Right rotation on the root
-
----
-
-### RL Rotation (Right-Left)
-
-**Condition:**  
-The new node is inserted into the **left subtree of the right child**.
-
-**Fix:**
-
-1. Right rotation on the right child
-2. Left rotation on the root
-
----
-
-## ⚔️ AVL Trees vs Red-Black Trees
-
-| Feature       | AVL Tree             | Red-Black Tree        |
-| ------------- | -------------------- | --------------------- |
-| Balance       | Strictly balanced    | Loosely balanced      |
-| Height        | Smaller              | Slightly larger       |
-| Search        | Faster               | Slightly slower       |
-| Insert/Delete | More rotations       | Fewer rotations       |
-| Storage       | Stores height        | Stores color          |
-| Best Use      | Read-heavy workloads | Write-heavy workloads |
-
-Examples:
-
-- **AVL Trees:** Databases, memory indexing
-- **Red-Black Trees:** Linux kernel, C++ STL `map`
-
----
-
-## 🛠 Technologies Used
-
-| Technology       | Purpose                     |
-| ---------------- | --------------------------- |
-| HTML5            | Page structure              |
-| CSS3             | Styling and animations      |
-| JavaScript (ES6) | AVL logic and visualization |
-| SVG              | Drawing tree edges          |
-| Google Fonts     | UI typography               |
-
----
-
-## 📁 Project Structure
-
-```
-avl_tree/
-├── index.html
-├── style.css
-├── avl.js
-├── avltree.java
-└── README.md
-```
-
----
-
-## 📝 License
-
-This project is open source and available under the **MIT License**.
+Made by **Siddarth K**
